@@ -37,5 +37,4 @@ jobs:
       telegram_chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
       telegram_bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       repositories: '[{"owner": "codex-org-bot", "repo": "CodeX-Assistant"}'
-    secrets:
-      GITHUB_TOKEN: ${{ needs.generate-token.outputs.token }}
+    secrets: inherit
