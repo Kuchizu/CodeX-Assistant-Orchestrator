@@ -45,4 +45,4 @@ jobs:
       telegram_bot_token: ${{ needs.generate-token.outputs.telegram_bot_token }}
       repositories: '[{"owner": "codex-org-bot", "repo": "CodeX-Assistant"}]'
     secrets:
-      GITHUB_TOKEN: ${{ needs.generate-token.outputs.token }}
+      APP_GH_TOKEN: ${{ needs.generate-token.outputs.token }}
