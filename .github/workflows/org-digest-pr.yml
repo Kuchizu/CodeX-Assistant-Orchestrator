@@ -1,0 +1,26 @@
+name: Organization PR Digest
+
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Days to search Pull requests'
+        required: false
+        default: '7'
+        type: string
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  digest:
+    uses: ./.github/workflows/digest-pull-request.yml
+    with:
+      days: ${{ inputs.days || '7' }}
+      telegram_chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
+      telegram_bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      repositories: '[{"owner": "codex-org-bot", "repo": "CodeX-Assistant"}]'
+    secrets: inherit
