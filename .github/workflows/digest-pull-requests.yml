@@ -1,0 +1,144 @@
+name: digest-pull-request
+
+on:
+  workflow_call:
+    inputs:
+      days:
+        description: 'How many days back to look for open PRs'
+        required: false
+        default: '7'
+        type: string
+      repositories:
+        description: 'List of repositories as JSON. If empty – current repo is used'
+        required: false
+        default: '[]'
+        type: string
+    secrets:
+      TELEGRAM_CHAT_ID:
+        description: 'Telegram chat id'
+        required: true
+      TELEGRAM_BOT_TOKEN:
+        description: 'Telegram bot token'
+        required: true
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get and send digest of open PRs
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const days = parseInt('${{ inputs.days }}') || 7;
+            const sinceDate = new Date();
+            sinceDate.setDate(sinceDate.getDate() - days);
+
+            let repositories = [];
+            try {
+              const reposInput = '${{ inputs.repositories }}';
+              if (reposInput && reposInput !== '[]') {
+                repositories = JSON.parse(reposInput);
+              }
+            } catch (e) {
+              console.log('Failed to parse repositories, using current repo');
+            }
+
+            if (repositories.length === 0) {
+              repositories = [{
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              }];
+            }
+
+            const allPRs = [];
+
+            for (const repo of repositories) {
+              try {
+                const prs = await github.rest.pulls.list({
+                  owner: repo.owner,
+                  repo: repo.repo,
+                  state: 'open',
+                  sort: 'created',
+                  direction: 'desc',
+                  per_page: 100
+                });
+
+                const recentOpenPRs = prs.data.filter(pr => {
+                  if (!pr.created_at) return false;
+                  const createdAt = new Date(pr.created_at);
+                  return createdAt >= sinceDate;
+                });
+
+                recentOpenPRs.forEach(pr => {
+                  allPRs.push({
+                    ...pr,
+                    repo_owner: repo.owner,
+                    repo_name: repo.repo
+                  });
+                });
+              } catch (error) {
+                console.log(`Error fetching PRs for ${repo.owner}/${repo.repo}: ${error.message}`);
+              }
+            }
+
+            // Sort by creation date: newest first
+            allPRs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            console.log(`Found ${allPRs.length} open PRs created in the last ${days} days`);
+
+            // If there are no PRs – do not send anything to Telegram
+            if (allPRs.length === 0) {
+              console.log('No open PRs to notify about');
+              return;
+            }
+
+            let message = `*Open pull requests created in the last ${days} day${days === 1 ? '' : 's'}*` + '\n\n';
+
+            allPRs.forEach((pr, index) => {
+              const repoName = pr.repo_name || context.repo.repo;
+              const repoOwner = pr.repo_owner || context.repo.owner;
+              const prUrl = `https://github.com/${repoOwner}/${repoName}/pull/${pr.number}`;
+
+              const createdDate = new Date(pr.created_at);
+              const daysAgo = Math.floor((new Date() - createdDate) / (1000 * 60 * 60 * 24));
+              const daysText =
+                daysAgo === 0
+                  ? 'today'
+                  : `${daysAgo} day${daysAgo === 1 ? '' : 's'} ago`;
+
+              message += `${index + 1}. [${repoOwner}/${repoName}#${pr.number}](${prUrl}): ${pr.title}\n`;
+              message += `_Author_: ${pr.user.login}, _created_: ${daysText}\n\n`;
+            });
+
+            message += `Total: *${allPRs.length}* PR${allPRs.length === 1 ? '' : 's'}`;
+
+            const telegramChatId = '${{ secrets.TELEGRAM_CHAT_ID }}';
+            const telegramBotToken = '${{ secrets.TELEGRAM_BOT_TOKEN }}';
+
+            const telegramUrl = `https://api.telegram.org/bot${telegramBotToken}/sendMessage`;
+
+            const response = await fetch(telegramUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                chat_id: telegramChatId,
+                text: message,
+                parse_mode: 'Markdown',
+                disable_web_page_preview: false
+              })
+            });
+
+            if (!response.ok) {
+              const errorText = await response.text();
+              throw new Error(`Failed to send Telegram message: ${errorText}`);
+            }
+
+            console.log('Digest of open PRs sent to Telegram successfully');
