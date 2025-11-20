@@ -1,4 +1,4 @@
-name: digest-pull-request
+name: Digest Pull Requests
 
 on:
   workflow_call:
