@@ -12,7 +12,7 @@ Workflow ищет открытые пулл реквесты, созданные
 - Читает список открытых PR для каждого репозитория через `github.rest.pulls.list` с `state: 'open'` и фильтрует по дате создания `created_at >= sinceDate`.
 - Сортирует PR по дате создания от новых к старым.
 - Собирает Markdown-текст со строками вида: `owner/repo#number`, заголовок, автор, сколько дней назад создан, ссылка на PR.
-- Отправляет сообщение в Telegram тем же способом, что и `digest-new-features.yml` (Bot API, `sendMessage`).
+- Делает POST-запрос к `https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/sendMessage` с этим текстом.
 - Использует секреты `TELEGRAM_CHAT_ID` и `TELEGRAM_BOT_TOKEN`, прокинутые из вызывающего workflow.
 
 
@@ -27,5 +27,5 @@ Workflow собирает за заданный период все смерже
 - Использует `actions/github-script@v7`.
 - Через GitHub REST API (`github.rest.pulls.list`) получает список закрытых PR и фильтрует их по полю `merged_at` за последние N дней (по умолчанию 1 день).
 - Формирует простой Markdown-текст: репозиторий, номер PR, заголовок, автор, когда был смержен, ссылка на PR.
-- Делает POST-запрос к `https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/sendMessage` с этим текстом.
+- Отправляет сообщение в Telegram тем же способом, что и `digest-pull-requests.yml` (Bot API, `sendMessage`).
 - Использует секреты `TELEGRAM_CHAT_ID` и `TELEGRAM_BOT_TOKEN`.
