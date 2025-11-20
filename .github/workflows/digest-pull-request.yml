@@ -21,6 +21,9 @@ on:
         required: false
         default: '[]'
         type: string
+    secrets:
+      GITHUB_TOKEN:
+        required: true
 
 jobs:
   digest:
