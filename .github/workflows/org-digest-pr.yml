@@ -16,32 +16,10 @@ permissions:
   contents: read
 
 jobs:
-  generate-token:
-    runs-on: ubuntu-latest
-    outputs:
-      token: ${{ steps.generate.outputs.token }}
-      telegram_chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
-      telegram_bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-    steps:
-      - name: Generate token
-        id: generate
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-      - name: Set telegram secrets
-        id: telegram
-        run: |
-          echo "chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" >> $GITHUB_OUTPUT
-          echo "bot_token=${{ secrets.TELEGRAM_BOT_TOKEN }}" >> $GITHUB_OUTPUT
-
   digest:
-    needs: generate-token
     uses: ./.github/workflows/digest-pull-request.yml
     with:
       days: ${{ inputs.days || '7' }}
-      telegram_chat_id: ${{ needs.generate-token.outputs.telegram_chat_id }}
-      telegram_bot_token: ${{ needs.generate-token.outputs.telegram_bot_token }}
+      telegram_chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
+      telegram_bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       repositories: '[{"owner": "codex-org-bot", "repo": "CodeX-Assistant"}]'
-    secrets:
-      APP_GH_TOKEN: ${{ needs.generate-token.outputs.token }}
