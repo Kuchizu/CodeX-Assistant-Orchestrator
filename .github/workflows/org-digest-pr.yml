@@ -16,11 +16,26 @@ permissions:
   contents: read
 
 jobs:
+  generate-token:
+    runs-on: ubuntu-latest
+    outputs:
+      token: ${{ steps.generate.outputs.token }}
+    steps:
+      - name: Generate token
+        id: generate
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.GITHUB_APP_ID }}
+          private-key: ${{ secrets.GITHUB_APP_PRIVATE_KEY }}
+          installation-id: ${{ secrets.GITHUB_APP_INSTALLATION_ID }}
+
   digest:
+    needs: generate-token
     uses: ./.github/workflows/digest-pull-request.yml
     with:
       days: ${{ inputs.days || '7' }}
       telegram_chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
       telegram_bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-      repositories: '[{"owner": "codex-org-bot", "repo": "CodeX-Assistant"}]'
-    secrets: inherit
+      repositories: '[{"owner": "codex-org-bot", "repo": "CodeX-Assistant"}'
+    secrets:
+      GITHUB_TOKEN: ${{ needs.generate-token.outputs.token }}
