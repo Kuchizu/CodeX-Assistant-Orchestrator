@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   digest:
-    uses: ./.github/workflows/digest-pull-request.yml
+    uses: ./.github/workflows/digest-new-features.yml
     with:
       days: ${{ inputs.days || '7' }}
       repositories: '[{"owner": "Kuchizu", "repo": "CodeX-Assistant"}]'
