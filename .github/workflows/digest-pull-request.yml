@@ -95,7 +95,7 @@ jobs:
               return;
             }
 
-            let message = `**Updated (merged PRs in last ${days} days)**\\n\\n`;
+            let message = `**Updated (merged PRs in last ${days} days)**\n\n`;
 
             allPRs.forEach((pr, index) => {
               const repoName = pr.repo_name || context.repo.repo;
@@ -106,8 +106,8 @@ jobs:
               const daysAgo = Math.floor((new Date() - mergedDate) / (1000 * 60 * 60 * 24));
               const daysText = daysAgo === 0 ? 'today' : `${daysAgo} days ago`;
 
-              message += `${index + 1}. [${repoOwner}/${repoName}#${pr.number}](${prUrl}): ${pr.title}\\n`;
-              message += `${pr.user.login} · ${daysText}\\n`;
+              message += `${index + 1}. [${repoOwner}/${repoName}#${pr.number}](${prUrl}): ${pr.title}\n`;
+              message += `${pr.user.login} · ${daysText}\n`;
 
               if (pr.body) {
                 const shortBody = pr.body.length > 100 
@@ -116,7 +116,7 @@ jobs:
                 message += `${shortBody.replace(/\\n/g, ' ')}\\n`;
               }
 
-              message += `\\n`;
+              message += `\n`;
             });
 
             message += `Всего: ${allPRs.length} PR${allPRs.length > 1 ? 's' : ''}`;
