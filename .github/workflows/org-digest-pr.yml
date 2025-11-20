@@ -29,7 +29,6 @@ jobs:
         with:
           app-id: ${{ secrets.GITHUB_APP_ID }}
           private-key: ${{ secrets.GITHUB_APP_PRIVATE_KEY }}
-          installation-id: ${{ secrets.GITHUB_APP_INSTALLATION_ID }}
       - name: Set telegram secrets
         id: telegram
         run: |
