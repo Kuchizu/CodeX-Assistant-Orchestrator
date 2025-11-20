@@ -1,0 +1,26 @@
+name: Organization PR Digest
+
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Days to search open pull requests'
+        required: false
+        default: '7'
+        type: string
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  digest-open-prs:
+    uses: ./.github/workflows/digest-pull-request.yml
+    with:
+      days: ${{ inputs.days || '7' }}
+      repositories: '[{"owner": "Kuchizu", "repo": "CodeX-Assistant"}]'
+    secrets:
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
