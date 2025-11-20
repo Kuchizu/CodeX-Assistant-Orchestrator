@@ -1,4 +1,4 @@
-name: Organization PR Digest
+name: Organization PR new features
 
 on:
   schedule:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       days:
-        description: 'Days to search Pull requests'
+        description: 'Days to search merged pull requests'
         required: false
         default: '7'
         type: string
