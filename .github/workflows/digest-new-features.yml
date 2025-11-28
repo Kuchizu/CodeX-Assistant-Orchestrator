@@ -95,7 +95,7 @@ jobs:
               return;
             }
 
-            let message = `*New releases in last ${days} day${days === 1 ? '' : 's'}*\n\n`;
+            let message = `*New releases in last ${days} day${days === 1 ? '' : 's'}:*\n\n`;
 
             allPRs.forEach((pr, index) => {
               const repoName = pr.repo_name || context.repo.repo;
