@@ -112,8 +112,8 @@ jobs:
                   ? 'today'
                   : `${daysAgo} day${daysAgo === 1 ? '' : 's'} ago`;
 
-              message += `${index + 1}. [${pr.title}](${prUrl})\n`;
-              message += `${daysText}\n\n`;
+              message += `${pr.user.login}/${repoName}#${pr.number}: [${pr.title}](${prUrl})\n`;
+              message += `_${daysText}_\n\n`;
             });
 
             const telegramChatId = '${{ secrets.TELEGRAM_CHAT_ID }}';
