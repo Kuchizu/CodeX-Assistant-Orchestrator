@@ -98,7 +98,7 @@ jobs:
               return;
             }
 
-            let message = `*Open pull requests created in the last ${days} day${days === 1 ? '' : 's'}*` + '\n\n';
+            let message = `*Waiting for review PRs in last ${days} day${days === 1 ? '' : 's'}*\n\n`;
 
             allPRs.forEach((pr, index) => {
               const repoName = pr.repo_name || context.repo.repo;
@@ -112,11 +112,9 @@ jobs:
                   ? 'today'
                   : `${daysAgo} day${daysAgo === 1 ? '' : 's'} ago`;
 
-              message += `${index + 1}. [${repoOwner}/${repoName}#${pr.number}](${prUrl}): ${pr.title}\n`;
-              message += `_Author_: ${pr.user.login}, _created_: ${daysText}\n\n`;
+              message += `${index + 1}. [${pr.title}](${prUrl})\n`;
+              message += `${daysText}\n\n`;
             });
-
-            message += `Total: *${allPRs.length}* PR${allPRs.length === 1 ? '' : 's'}`;
 
             const telegramChatId = '${{ secrets.TELEGRAM_CHAT_ID }}';
             const telegramBotToken = '${{ secrets.TELEGRAM_BOT_TOKEN }}';
